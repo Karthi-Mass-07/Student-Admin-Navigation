@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    networks:
+      - mern
+    volumes:
+      - ./mern/frontend:/app
+    stdin_open: true
+    tty: true
+    command: npm run dev  # Assuming you're using Vite
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - mern
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/magasool
+    volumes:
+      - ./mern/backend:/app
+    command: npm start
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - mern
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  mern:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
